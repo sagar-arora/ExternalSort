@@ -52,6 +52,10 @@ public final class ExternalSort {
         }
     }
 
+    public Run mergeRun() {
+        return null;
+    }
+
     public List<Run> mergeRuns(List<Run> runs) {
 
         List<Run> mergeList = new ArrayList<>();
@@ -75,7 +79,7 @@ public final class ExternalSort {
             File tempFile = Utils.createTempFile();
             Page page = Utils.readPage(binaryFile, i);
             page.sort();
-            page.writePageToFile(tempFile);
+            Utils.writePageToFile(tempFile, page);
             Run run = new Run(tempFile);
             runs.add(run);
         }

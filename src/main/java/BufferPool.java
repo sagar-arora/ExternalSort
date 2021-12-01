@@ -11,10 +11,14 @@ public class BufferPool {
     }
 
     public Page getPage(int index) {
-        return null;
+        return pages[index];
     }
 
     public void flushPage(int index) {
+
+    }
+
+    public void addToOutputBuffer(int field) {
 
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 public class Page {
 
     List<Integer> data;
+    public static int FIELD_SIZE = Integer.SIZE;
     // size in bytes
     public static int PAGE_SIZE = 4096;
 
@@ -24,6 +25,10 @@ public class Page {
 
     public Page(List<Integer> list) {
         this.data = list;
+    }
+
+    public Page() {
+        this.data = new ArrayList<>();
     }
 
     public void sort() {
@@ -43,11 +48,25 @@ public class Page {
         this.PAGE_SIZE = size;
     }
 
-    public void writePageToFile(File file) throws IOException {
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file));
+    public byte[] serialize() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
         for (int num : data) {
-            objectOutputStream.writeInt(num);
+            oos.writeInt(num);
         }
-        objectOutputStream.close();
+        oos.flush();
+        return baos.toByteArray();
+    }
+
+    public boolean pageFull() {
+        return data.size() * FIELD_SIZE > PAGE_SIZE;
+    }
+
+    public void addField(int field) throws PageFullException {
+        if (pageFull()) {
+            throw new PageFullException();
+        }
+
+        data.add(field);
     }
 }

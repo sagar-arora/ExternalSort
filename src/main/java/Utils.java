@@ -1,7 +1,7 @@
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
 
 public class Utils {
 
@@ -19,5 +19,12 @@ public class Utils {
 
         Page page = new Page(rawPage, bytesRead);
         return page;
+    }
+
+    public static void writePageToFile(File file, Page page) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        byte[] rawPage = page.serialize();
+        fileOutputStream.write(rawPage);
+        fileOutputStream.close();
     }
 }
