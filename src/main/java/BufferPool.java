@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.IOException;
+
 public class BufferPool {
 
     Page[] pages;
@@ -14,11 +17,28 @@ public class BufferPool {
         return pages[index];
     }
 
-    public void flushPage(int index) {
-
+    public int getSize() {
+        return size;
     }
 
-    public void addToOutputBuffer(int field) {
+    public void addToOutputBuffer(File file, int field) throws IOException {
+        Page outputBufferPage = pages[outputBufferIndex];
+        try {
+            outputBufferPage.addField(field);
+        } catch (PageFullException e) {
+            Utils.flushPage(file, outputBufferPage);
+            pages[outputBufferIndex] = new Page();
+            try {
+                pages[outputBufferIndex].addField(field);
+            } catch (PageFullException ex) {
+                System.out.println("Shouldn't come here.");
+            }
+        }
+    }
 
+    public Page readPageIntoBufferPool(File file, int pageNumber, int bufferIndex) throws IOException {
+        Page page = Utils.readPage(file, pageNumber);
+        pages[pageNumber] = page;
+        return page;
     }
 }

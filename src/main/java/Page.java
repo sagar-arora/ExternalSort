@@ -3,6 +3,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class Page {
@@ -68,5 +69,9 @@ public class Page {
         }
 
         data.add(field);
+    }
+
+    public Iterator<Integer> pageIterator() {
+        return this.data.iterator();
     }
 }

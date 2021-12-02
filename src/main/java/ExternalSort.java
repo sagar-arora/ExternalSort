@@ -6,7 +6,7 @@ import java.util.List;
 
 public final class ExternalSort {
 
-    BufferPool bufferPool;
+    private static BufferPool bufferPool;
     private int pageSize;
     private int numPages;
     private File fileToSort;
@@ -30,7 +30,7 @@ public final class ExternalSort {
         this.numPages = numPages;
     }
 
-    public BufferPool getBufferPool() {
+    public static BufferPool getBufferPool() {
         return bufferPool;
     }
 

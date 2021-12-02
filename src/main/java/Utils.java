@@ -17,12 +17,18 @@ public class Utils {
         randomAccessFile.seek(pageNumber * Page.PAGE_SIZE);
         int bytesRead = randomAccessFile.read(rawPage, 0, Page.PAGE_SIZE);
 
-        Page page = new Page(rawPage, bytesRead);
-        return page;
+        return new Page(rawPage, bytesRead);
     }
 
     public static void writePageToFile(File file, Page page) throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(file);
+        byte[] rawPage = page.serialize();
+        fileOutputStream.write(rawPage);
+        fileOutputStream.close();
+    }
+
+    public static void flushPage(File file, Page page) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(file, true);
         byte[] rawPage = page.serialize();
         fileOutputStream.write(rawPage);
         fileOutputStream.close();
