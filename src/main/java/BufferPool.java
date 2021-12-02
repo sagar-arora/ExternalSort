@@ -3,22 +3,15 @@ import java.io.IOException;
 
 public class BufferPool {
 
-    Page[] pages;
-    int outputBufferIndex;
-    int size;
+    private final Page[] pages;
+    private final int outputBufferIndex;
+    public int size = 3;
 
     public BufferPool(int size) {
         this.pages = new Page[size];
         this.size = size;
         this.outputBufferIndex = size - 1;
-    }
-
-    public Page getPage(int index) {
-        return pages[index];
-    }
-
-    public int getSize() {
-        return size;
+        pages[outputBufferIndex] = new Page();
     }
 
     public Page getOutputBufferPage() {
@@ -42,7 +35,7 @@ public class BufferPool {
 
     public Page readPageIntoBufferPool(File file, int pageNumber, int bufferIndex) throws IOException {
         Page page = Utils.readPage(file, pageNumber);
-        pages[pageNumber] = page;
+        pages[bufferIndex] = page;
         return page;
     }
 }

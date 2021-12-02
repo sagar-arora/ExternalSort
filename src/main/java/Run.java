@@ -62,8 +62,9 @@ public class Run {
         }
     }
 
-    private File file;
+    private final File file;
     private static BufferPool bufferPool;
+
     Run(File file) {
         this.file = file;
         bufferPool = ExternalSort.getBufferPool();
@@ -87,4 +88,3 @@ public class Run {
         Utils.flushPage(file, bufferPool.getOutputBufferPage());
     }
 }
-

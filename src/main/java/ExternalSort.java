@@ -11,17 +11,6 @@ public final class ExternalSort {
     private int numPages;
     private File fileToSort;
 
-    public static final int DEFAULT_PAGE_SIZE = 4096;
-    public static final int DEFAULT_NUM_PAGES = 3;
-
-    public void setBufferPool(BufferPool bufferPool) {
-        this.bufferPool = bufferPool;
-    }
-
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
-
     public void setFileToSort(File fileToSort) {
         this.fileToSort = fileToSort;
     }
@@ -34,28 +23,10 @@ public final class ExternalSort {
         return bufferPool;
     }
 
-    public ExternalSort(BufferPool bufferPool) {
-        this.bufferPool = bufferPool;
-    }
-
     public ExternalSort(int pageSize, int numPages) {
-        this(new BufferPool(numPages));
         this.pageSize = pageSize;
-    }
-
-    public void sort() throws Exception {
-        File binaryFile = convertToBinaryFile(fileToSort);
-        List<Run> runs = splitIntoRuns(binaryFile);
-
-        while (runs.size() != 1) {
-            runs = doAMergeIteration(runs);
-        }
-        Run finalSortedRun = runs.get(0);
-        Run.RunIterator finalRun = finalSortedRun.getIterator(0); // pick an arbitrary buffer to use
-        
-        while (finalRun.hasNext()) {
-            System.out.println(finalRun.next());
-        }
+        this.numPages = numPages;
+        bufferPool = new BufferPool(pageSize);
     }
 
     public Run mergeRuns(List<Run> runs) throws IOException {
@@ -141,6 +112,22 @@ public final class ExternalSort {
         br.close();
 
         return binaryFile;
+    }
+
+
+    public void sort() throws Exception {
+        File binaryFile = convertToBinaryFile(fileToSort);
+        List<Run> runs = splitIntoRuns(binaryFile);
+
+        while (runs.size() != 1) {
+            runs = doAMergeIteration(runs);
+        }
+        Run finalSortedRun = runs.get(0);
+        Run.RunIterator finalRun = finalSortedRun.getIterator(0); // pick an arbitrary buffer to use
+
+        while (finalRun.hasNext()) {
+            System.out.println(finalRun.next());
+        }
     }
 
     public static void main(String[] args) throws Exception {
