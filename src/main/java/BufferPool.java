@@ -21,6 +21,10 @@ public class BufferPool {
         return size;
     }
 
+    public Page getOutputBufferPage() {
+        return pages[outputBufferIndex];
+    }
+
     public void addToOutputBuffer(File file, int field) throws IOException {
         Page outputBufferPage = pages[outputBufferIndex];
         try {

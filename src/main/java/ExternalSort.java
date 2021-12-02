@@ -43,30 +43,69 @@ public final class ExternalSort {
         this.pageSize = pageSize;
     }
 
-    public void sort(File file) throws Exception {
-        File binaryFile = convertToBinaryFile(file);
+    public void sort() throws Exception {
+        File binaryFile = convertToBinaryFile(fileToSort);
         List<Run> runs = splitIntoRuns(binaryFile);
 
         while (runs.size() != 1) {
-            runs = mergeRuns(runs);
+            runs = doAMergeIteration(runs);
+        }
+        Run finalSortedRun = runs.get(0);
+        Run.RunIterator finalRun = finalSortedRun.getIterator(0); // pick an arbitrary buffer to use
+        
+        while (finalRun.hasNext()) {
+            System.out.println(finalRun.next());
         }
     }
 
-    public Run mergeRun() {
-        return null;
+    public Run mergeRuns(List<Run> runs) throws IOException {
+        List<Run.RunIterator> runIterators = new ArrayList<>();
+        Run mergedRun = new Run();
+        int bufferIndex = 0;
+        for (int i = 0; i < runs.size(); i++) {
+            Run.RunIterator runIterator = runs.get(i).getIterator(bufferIndex);
+            runIterator.next();
+            bufferIndex++;
+            runIterators.add(runIterator);
+        }
+
+        while(runIterators.size() > 0) {
+            int min = Integer.MAX_VALUE;
+            Run.RunIterator currentMinIterator = null;
+           for (int i = 0; i < runs.size(); i++) {
+               Run.RunIterator runIterator = runIterators.get(i);
+               if (runIterator.current() < min) {
+                   currentMinIterator = runIterator;
+                   min = runIterator.current();
+               }
+
+               mergedRun.addField(currentMinIterator.current());
+
+               if (currentMinIterator != null && currentMinIterator.hasNext()) {
+                   currentMinIterator.next();
+               } else {
+                   runIterators.remove(currentMinIterator);
+               }
+           }
+        }
+
+        mergedRun.flush();
+
+        return mergedRun;
     }
 
-    public List<Run> mergeRuns(List<Run> runs) {
+    public List<Run> doAMergeIteration(List<Run> runs) throws IOException {
 
         List<Run> mergeList = new ArrayList<>();
         for (int i = 0; i < runs.size(); i++) {
             int maxLen = Math.max(runs.size(), this.numPages);
             List<Run> listToMerge = new ArrayList<>(runs.subList(0, maxLen));
             listToMerge.subList(0, maxLen).clear();
-            mergeRuns(listToMerge);
+            Run run = mergeRuns(listToMerge);
+            mergeList.add(run);
         }
 
-        return null;
+        return mergeList;
     }
 
     public List<Run> splitIntoRuns(File binaryFile) throws IOException {
@@ -88,7 +127,6 @@ public final class ExternalSort {
     }
 
     File convertToBinaryFile(File file) throws Exception {
-
         File binaryFile = Utils.createTempFile();
 
         DataOutputStream dos = new DataOutputStream(new FileOutputStream(binaryFile));
@@ -105,16 +143,19 @@ public final class ExternalSort {
         return binaryFile;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        int pageSize = Integer.parseInt(args[0]);
+        int numPages = Integer.parseInt(args[1]);
+        String fileNameToSort = args[3];
 
-        int pageSize = 4096;
-        int numPages = 3;
-        File file = null;
+        System.out.println("Got the following input:");
+        System.out.println("pageSize: " + pageSize);
+        System.out.println("numPages: " + numPages);
+        System.out.println("fileNameToSort: " + fileNameToSort);
 
         ExternalSort externalSort = new ExternalSort(pageSize, numPages);
-        externalSort.fileToSort = file;
+        externalSort.setFileToSort(new File(fileNameToSort));
 
-        // 1. Generate the runs
-
+        externalSort.sort();
     }
 }

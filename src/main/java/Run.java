@@ -4,53 +4,87 @@ import java.util.Iterator;
 
 public class Run {
 
-    class RunIterator<Integer> implements Iterator<Integer> {
+    public class RunIterator implements Iterator<Integer> {
 
         private final int bufferIndex;
-        private final int currentPageNumber;
+        private int currentPageNumber;
         private final int numPages;
-
-        RunIterator(int bufferIndex) {
+        private Iterator<Integer> pageIterator;
+        Integer next;
+        Integer current;
+        RunIterator(int bufferIndex) throws IOException {
             this.bufferIndex = bufferIndex;
             this.currentPageNumber = 0;
             this.numPages = (int) Math.ceil((double)file.length() / Page.PAGE_SIZE);
+            Page page = bufferPool.readPageIntoBufferPool(file, 0, bufferIndex);
+            this.pageIterator = page.pageIterator();
+        }
+
+        public Page readNextPage() {
+            try {
+                return bufferPool.readPageIntoBufferPool(file, this.currentPageNumber, bufferIndex);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Error occurred. should never happen");
+            }
+            return null;
         }
 
         public Integer readNextField() {
-            if ()
+            if (pageIterator.hasNext()) {
+                return pageIterator.next();
+            } else if (this.currentPageNumber++ < numPages) {
+                Page page = readNextPage();
+                this.pageIterator = page.pageIterator();
+                return this.pageIterator.next();
+            } else {
+                return null;
+            }
         }
 
         @Override
         public boolean hasNext() {
-            if (currentPageNumber) {
-
-            }
-
-            return false;
+            next = readNextField();
+            return next != null;
         }
 
         @Override
         public Integer next() {
-            return null;
+           if (next == null) {
+               return null;
+           }
+           current = next;
+           return next;
+        }
+
+        public int current() {
+            return current;
         }
     }
 
     private File file;
-    private BufferPool bufferPool;
+    private static BufferPool bufferPool;
     Run(File file) {
         this.file = file;
-        this.bufferPool = ExternalSort.getBufferPool();
+        bufferPool = ExternalSort.getBufferPool();
     }
 
     Run() throws IOException {
         this.file = File.createTempFile("external_sort", ".tmp");
         this.file.deleteOnExit();
-        this.bufferPool = ExternalSort.getBufferPool();
+        bufferPool = ExternalSort.getBufferPool();
     }
 
     public void addField(int field) throws IOException {
         bufferPool.addToOutputBuffer(file, field);
     }
 
+    public RunIterator getIterator(int bufferIndex) throws IOException {
+        return new RunIterator(bufferIndex);
+    }
+
+    public void flush() throws IOException {
+        Utils.flushPage(file, bufferPool.getOutputBufferPage());
+    }
 }
 
