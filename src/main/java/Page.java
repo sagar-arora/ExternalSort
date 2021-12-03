@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Page {
 
-    List<Integer> data;
+    private List<Integer> data;
     public static int FIELD_SIZE = Integer.SIZE;
     // size in bytes
     public static int PAGE_SIZE = 4096;
@@ -20,7 +20,7 @@ public class Page {
 
         while (lengthRemaining > 0) {
             data.add(intBuf.get());
-            lengthRemaining -= 4;
+            lengthRemaining -= Integer.BYTES;
         }
     }
 
@@ -51,8 +51,8 @@ public class Page {
 
     public byte[] serialize() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        for (int num : data) {
+        DataOutputStream oos = new DataOutputStream(baos);
+        for (Integer num : data) {
             oos.writeInt(num);
         }
         oos.flush();
@@ -67,11 +67,14 @@ public class Page {
         if (pageFull()) {
             throw new PageFullException();
         }
-
         data.add(field);
     }
 
     public Iterator<Integer> pageIterator() {
         return this.data.iterator();
+    }
+
+    public String toString() {
+        return "page = " + String.join(",", this.data.stream().map(x -> String.valueOf(x)).toList());
     }
 }

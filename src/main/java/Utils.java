@@ -14,9 +14,9 @@ public class Utils {
     public static Page readPage(File file, int pageNumber) throws IOException {
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         byte[] rawPage = new byte[Page.PAGE_SIZE];
-        randomAccessFile.seek(pageNumber * Page.PAGE_SIZE);
+        randomAccessFile.seek((long) pageNumber * Page.PAGE_SIZE);
         int bytesRead = randomAccessFile.read(rawPage, 0, Page.PAGE_SIZE);
-
+        System.out.println("reading pageNumber " + pageNumber + " with total bytes read: " + bytesRead);
         return new Page(rawPage, bytesRead);
     }
 

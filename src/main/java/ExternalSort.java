@@ -15,10 +15,6 @@ public final class ExternalSort {
         this.fileToSort = fileToSort;
     }
 
-    public void setNumPages(int numPages) {
-        this.numPages = numPages;
-    }
-
     public static BufferPool getBufferPool() {
         return bufferPool;
     }
@@ -45,7 +41,7 @@ public final class ExternalSort {
             Run.RunIterator currentMinIterator = null;
            for (int i = 0; i < runs.size(); i++) {
                Run.RunIterator runIterator = runIterators.get(i);
-               if (runIterator.current() < min) {
+               if (runIterator.current() <= min) {
                    currentMinIterator = runIterator;
                    min = runIterator.current();
                }
@@ -81,19 +77,20 @@ public final class ExternalSort {
 
     public List<Run> splitIntoRuns(File binaryFile) throws IOException {
 
-        int len = (int) binaryFile.length() / pageSize;
+        int numPages = (int) Math.ceil((double) binaryFile.length() / pageSize);
 
+        System.out.println("number of pages: " + numPages);
         List<Run> runs = new ArrayList<>();
 
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < numPages; i++) {
             File tempFile = Utils.createTempFile();
             Page page = Utils.readPage(binaryFile, i);
             page.sort();
+            System.out.println(page);
             Utils.writePageToFile(tempFile, page);
             Run run = new Run(tempFile);
             runs.add(run);
         }
-
         return runs;
     }
 
@@ -105,6 +102,7 @@ public final class ExternalSort {
 
         String line = null;
         while ((line = br.readLine()) != null) {
+            System.out.println("read line " + line);
             dos.writeInt(Integer.parseInt(line));
         }
 
@@ -133,7 +131,7 @@ public final class ExternalSort {
     public static void main(String[] args) throws Exception {
         int pageSize = Integer.parseInt(args[0]);
         int numPages = Integer.parseInt(args[1]);
-        String fileNameToSort = args[3];
+        String fileNameToSort = args[2];
 
         System.out.println("Got the following input:");
         System.out.println("pageSize: " + pageSize);

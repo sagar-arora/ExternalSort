@@ -36,6 +36,7 @@ public class BufferPool {
     public Page readPageIntoBufferPool(File file, int pageNumber, int bufferIndex) throws IOException {
         Page page = Utils.readPage(file, pageNumber);
         pages[bufferIndex] = page;
+        System.out.println("Read the following page " + page);
         return page;
     }
 }
