@@ -36,7 +36,7 @@ public class Run {
             } else if (this.currentPageNumber++ < numPages) {
                 Page page = readNextPage();
                 this.pageIterator = page.pageIterator();
-                return this.pageIterator.next();
+                return this.pageIterator.hasNext() ? this.pageIterator.next(): null;
             } else {
                 return null;
             }
@@ -57,7 +57,7 @@ public class Run {
            return next;
         }
 
-        public int current() {
+        public Integer current() {
             return current;
         }
     }
